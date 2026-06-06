@@ -217,6 +217,7 @@
   .badge-done { background: rgba(16, 185, 129, 0.1); color: #059669; }
   .badge-current { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
   .badge-future { background: rgba(100, 116, 139, 0.1); color: #475569; }
+  .badge-perm { background: rgba(16, 185, 129, 0.1); color: #059669; }
 
   /* Course Table Headers */
   .col-header {
@@ -246,6 +247,10 @@
     border-bottom: 1px solid rgba(15, 23, 42, 0.03);
     gap: 12px;
     transition: background 0.2s;
+  }
+
+  .course-row.locked-row {
+    grid-template-columns: 1fr 52px 56px 60px;
   }
 
   .course-row:hover { background: rgba(255, 255, 255, 0.4); }
@@ -453,24 +458,24 @@ const completedSems = [
       { name: "Quantitative and Reasoning Aptitude", credits: 2, grade: "B" }
     ],
     sgpa: 7.85
+  },
+  {
+    sem: 6,
+    courses: [
+      { name: "BTP", credits: 4, grade: "C" },
+      { name: "WBD", credits: 4, grade: "O" },
+      { name: "Additional Project", credits: 3, grade: "B" },
+      { name: "IS", credits: 3, grade: "B" },
+      { name: "IAS", credits: 3, grade: "B" },
+      { name: "FDA", credits: 3, grade: "C" },
+      { name: "SEPTA", credits: 2, grade: "B" }
+    ],
+    sgpa: 8.05
   }
 ];
 
 // Editable semesters
 const editableSems = [
-  {
-    sem: 6,
-    status: "current",
-    courses: [
-      { name: "Course 1", credits: 4 },
-      { name: "Course 2", credits: 4 },
-      { name: "Course 3", credits: 3 },
-      { name: "Course 4", credits: 3 },
-      { name: "Course 5", credits: 3 },
-      { name: "Course 6", credits: 3 },
-      { name: "Course 7", credits: 3 }
-    ]
-  },
   {
     sem: 7,
     status: "future",
@@ -478,7 +483,8 @@ const editableSems = [
       { name: "Course 1", credits: 4 },
       { name: "Course 2", credits: 4 },
       { name: "Course 3", credits: 3 },
-      { name: "Course 4", credits: 3 }
+      { name: "Course 4", credits: 3 },
+      { name: "Mode Subject", credits: 3 }
     ]
   },
   {
@@ -584,24 +590,37 @@ function buildCompletedCard(semData, idx) {
 
 // Build editable sem card
 function buildEditableCard(semData, idx) {
-  const { sem, status, courses } = semData;
-  const badge = status === 'current' ? 'badge-current' : 'badge-future';
-  const badgeText = status === 'current' ? 'Current' : 'Upcoming';
+  const { sem, status, courses, locked } = semData;
+  const badge = locked ? 'badge-perm' : (status === 'current' ? 'badge-current' : 'badge-future');
+  const badgeText = locked ? 'Permanent' : (status === 'current' ? 'Current' : 'Upcoming');
 
-  let rows = courses.map((c, ci) => `
-    <div class="course-row editable-row">
-      <input type="text" placeholder="${c.name}" value="${c.name}"
-             onchange="updateCourseName(${sem},${ci},this.value)" />
-      <input type="number" value="${c.credits}" min="1" max="6" step="1"
-             onchange="updateCourseCredits(${sem},${ci},+this.value)"
-             title="Credits" />
-      <select class="grade-select" onchange="updateGrade(${sem},${ci},this.value)">
-        <option value="">Gr</option>
-        ${['O','A','B','C','D','P','F'].map(g=>`<option value="${g}" ${c.grade===g?'selected':''}>${g}</option>`).join('')}
-      </select>
-      <div class="grade-chip ${gradeClass(c.grade)}" id="gchip_${sem}_${ci}">${c.grade ? GP[c.grade] : '—'}</div>
-    </div>
-  `).join('');
+  let rows = courses.map((c, ci) => {
+    if (locked) {
+      return `
+        <div class="course-row editable-row locked-row">
+          <div class="course-name">${c.name}</div>
+          <div class="course-credits">${c.credits}cr</div>
+          <div class="grade-chip ${gradeClass(c.grade)}">${c.grade || '—'}</div>
+          <div class="grade-chip ${gradeClass(c.grade)}">${c.grade ? GP[c.grade] : '—'}</div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="course-row editable-row">
+        <input type="text" placeholder="${c.name}" value="${c.name}"
+               onchange="updateCourseName(${sem},${ci},this.value)" />
+        <input type="number" value="${c.credits}" min="1" max="6" step="1"
+               onchange="updateCourseCredits(${sem},${ci},+this.value)"
+               title="Credits" />
+        <select class="grade-select" onchange="updateGrade(${sem},${ci},this.value)">
+          <option value="">Gr</option>
+          ${['O','A','B','C','D','P','F'].map(g=>`<option value="${g}" ${c.grade===g?'selected':''}>${g}</option>`).join('')}
+        </select>
+        <div class="grade-chip ${gradeClass(c.grade)}" id="gchip_${sem}_${ci}">${c.grade ? GP[c.grade] : '—'}</div>
+      </div>
+    `;
+  }).join('');
 
   return `
     <div class="glass sem-card" style="animation-delay:${idx * 0.05}s" id="editCard_${sem}">
