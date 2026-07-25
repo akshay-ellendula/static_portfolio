@@ -1,560 +1,673 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CGPA Tracker — Ellendula Akshay</title>
-<style>
-  :root {
-    --bg: #f8fafc;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
-    --glass-bg: rgba(255, 255, 255, 0.65);
-    --glass-border: rgba(255, 255, 255, 0.8);
-    --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
-    
-    /* Grade Colors (Light Theme) */
-    --g-O: #059669; --g-O-bg: rgba(16, 185, 129, 0.15);
-    --g-A: #2563eb; --g-A-bg: rgba(59, 130, 246, 0.15);
-    --g-B: #7c3aed; --g-B-bg: rgba(139, 92, 246, 0.15);
-    --g-C: #d97706; --g-C-bg: rgba(245, 158, 11, 0.15);
-    --g-D: #ea580c; --g-D-bg: rgba(249, 115, 22, 0.15);
-    --g-P: #475569; --g-P-bg: rgba(100, 116, 139, 0.15);
-    --g-F: #e11d48; --g-F-bg: rgba(225, 29, 72, 0.15);
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CGPA Tracker — Ellendula Akshay</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --glass-bg: rgba(255, 255, 255, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.05);
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    background-color: var(--bg);
-    color: var(--text-main);
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  /* Glassmorphism Background Blobs */
-  body::before, body::after {
-    content: '';
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(100px);
-    z-index: -1;
-    pointer-events: none;
-  }
-  body::before {
-    top: -10%; left: -5%;
-    width: 50vw; height: 50vh;
-    background: rgba(59, 130, 246, 0.25); /* Soft Blue */
-  }
-  body::after {
-    bottom: -10%; right: -5%;
-    width: 60vw; height: 60vh;
-    background: rgba(139, 92, 246, 0.2); /* Soft Purple */
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 60px 20px 100px;
-  }
-
-  /* Glass Panel Utility Class */
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    box-shadow: var(--glass-shadow);
-  }
-
-  /* Header Section */
-  .header {
-    margin-bottom: 40px;
-    text-align: center;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .institute-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    color: var(--accent);
-    text-transform: uppercase;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    padding: 6px 14px;
-    border-radius: 20px;
-    margin-bottom: 16px;
-  }
-
-  h1 {
-    font-size: clamp(32px, 6vw, 48px);
-    font-weight: 800;
-    color: var(--text-main);
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-  }
-
-  .roll-no {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-top: 12px;
-    letter-spacing: 0.05em;
-  }
-
-  /* Global Stats Hero */
-  .hero-stats-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 60px;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-
-  .stat-card {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    transition: transform 0.2s;
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-2px);
-  }
-
-  .stat-val {
-    font-size: 36px;
-    font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 4px;
-  }
-  
-  .stat-val.primary {
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-
-  /* Section Titles */
-  .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(15, 23, 42, 0.1);
-  }
-
-  /* Semesters Grid */
-  .semesters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 24px;
-    margin-bottom: 50px;
-  }
-
-  .sem-card {
-    overflow: hidden;
-    animation: fadeUp 0.5s ease both;
-    transition: box-shadow 0.2s, border-color 0.2s;
-  }
-
-  .sem-card:hover {
-    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
-  }
-
-  .sem-header {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
-    background: rgba(255, 255, 255, 0.4);
-  }
-
-  .sem-num {
-    font-size: 16px;
-    font-weight: 700;
-  }
-
-  .sem-badge {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    padding: 4px 12px;
-    border-radius: 20px;
-    text-transform: uppercase;
-  }
-
-  .badge-done { background: rgba(16, 185, 129, 0.1); color: #059669; }
-  .badge-current { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
-  .badge-future { background: rgba(100, 116, 139, 0.1); color: #475569; }
-  .badge-perm { background: rgba(16, 185, 129, 0.1); color: #059669; }
-
-  /* Course Table Headers */
-  .col-header {
-    padding: 10px 20px;
-    display: grid;
-    grid-template-columns: 1fr 48px 80px;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
-  }
-
-  .col-h { 
-    font-size: 10px; 
-    color: var(--text-muted); 
-    letter-spacing: 0.08em; 
-    text-transform: uppercase; 
-    font-weight: 600;
-  }
-  .col-h.center { text-align: center; }
-
-  /* Course Rows */
-  .course-row {
-    display: grid;
-    grid-template-columns: 1fr 48px 80px;
-    align-items: center;
-    padding: 12px 20px;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.03);
-    gap: 12px;
-    transition: background 0.2s;
-  }
-
-  .course-row.locked-row {
-    grid-template-columns: 1fr 52px 56px 60px;
-  }
-
-  .course-row:hover { background: rgba(255, 255, 255, 0.4); }
-  .course-row:last-child { border-bottom: none; }
-
-  .course-name {
-    font-size: 12px;
-    color: var(--text-main);
-    line-height: 1.4;
-    font-weight: 500;
-  }
-
-  .course-credits {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-align: center;
-  }
-
-  .grade-chip {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
-    text-align: center;
-  }
-
-  /* Grade Colors */
-  .g-O  { background: var(--g-O-bg); color: var(--g-O); }
-  .g-A  { background: var(--g-A-bg); color: var(--g-A); }
-  .g-B  { background: var(--g-B-bg); color: var(--g-B); }
-  .g-C  { background: var(--g-C-bg); color: var(--g-C); }
-  .g-D  { background: var(--g-D-bg); color: var(--g-D); }
-  .g-P  { background: var(--g-P-bg); color: var(--g-P); }
-  .g-F  { background: var(--g-F-bg); color: var(--g-F); }
-  .g-NA { background: rgba(15, 23, 42, 0.05); color: var(--text-muted); }
-
-  /* Editable Rows Configuration */
-  .col-header.editable-cols, .course-row.editable-row {
-    grid-template-columns: 1fr 52px 56px 60px;
-  }
-
-  .editable-row input, .editable-row select {
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    border-radius: 8px;
-    color: var(--text-main);
-    font-family: inherit;
-    font-size: 11px;
-    padding: 6px 8px;
-    width: 100%;
-    transition: all 0.2s;
-    outline: none;
-  }
-
-  .editable-row input:focus, .editable-row select:focus {
-    background: #fff;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-  }
-
-  select.grade-select {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    padding-right: 20px;
-  }
-
-  /* Semester Footer Metrics */
-  .sem-footer {
-    padding: 16px 20px;
-    border-top: 1px solid rgba(15, 23, 42, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  .footer-stat { display: flex; flex-direction: column; gap: 4px; align-items: center; }
-  .footer-stat-val { font-size: 20px; font-weight: 700; color: var(--text-main); }
-  .footer-stat-lbl { font-size: 9px; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; }
-
-  /* Info Note */
-  .edit-note {
-    font-size: 12px;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 24px;
-    padding: 12px 20px;
-    background: rgba(59, 130, 246, 0.08);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
-    font-weight: 500;
-  }
-
-  /* Animations & Scrollbar */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.15); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.25); }
-
-</style>
-</head>
-<body>
-<div class="container">
-
-  <div class="header">
-    <div class="institute-tag">IIIT Sri City · CSE · B.Tech</div>
-    <h1>Academic Tracker</h1>
-    <div class="roll-no">ELLENDULA AKSHAY &nbsp;·&nbsp; S20230010079</div>
-  </div>
-
-  <div class="hero-stats-container">
-    <div class="glass stat-card">
-      <div class="stat-val primary" id="cgpaHeroVal">—</div>
-      <div class="stat-label">Cumulative CGPA</div>
-    </div>
-    <div class="glass stat-card">
-      <div class="stat-val" id="heroCredits">—</div>
-      <div class="stat-label">Total Credits Earned</div>
-    </div>
-    <div class="glass stat-card">
-      <div class="stat-val" id="heroPct">—%</div>
-      <div class="stat-label">Equivalent Percentage</div>
-    </div>
-  </div>
-
-  <div class="section-title">Completed Record</div>
-  <div class="semesters-grid" id="completedGrid"></div>
-  <div class="semesters-grid" id="editableGrid"></div>
-
-</div>
-
-<script>
-// Grade points mapping
-const GP = { O:10, A:9, B:8, C:7, D:6, P:5, F:0 };
-
-// Completed semesters data
-const completedSems = [
-  {
-    sem: 1,
-    courses: [
-      { name: "Discrete Structures and Matrix Algebra", credits: 4, grade: "C" },
-      { name: "Computer Programming", credits: 4, grade: "C" },
-      { name: "Digital Logic Design", credits: 4, grade: "B" },
-      { name: "Overview of Computers Workshop", credits: 4, grade: "C" },
-      { name: "Essential English", credits: 2, grade: "D" },
-      { name: "Foundations in Human Values and Ethics", credits: 2, grade: "O" }
-    ],
-    sgpa: 7.40
-  },
-  {
-    sem: 2,
-    courses: [
-      { name: "Problem Solving (PS)", credits: 4, grade: "A" },
-      { name: "Data Structures and Algorithms (DSA)", credits: 4, grade: "C" },
-      { name: "Soft Skills (SS)", credits: 4, grade: "B" },
-      { name: "Computer Architecture (CA)", credits: 4, grade: "B" },
-      { name: "OPC", credits: 2, grade: "D" },
-      { name: "CCI", credits: 2, grade: "B" }
-    ],
-    sgpa: 7.80
-  },
-  {
-    sem: 3,
-    courses: [
-      { name: "Object Oriented Programming", credits: 4, grade: "C" },
-      { name: "Real Analysis, Numerical Analysis & Calculus", credits: 4, grade: "B" },
-      { name: "Database Management System", credits: 4, grade: "C" },
-      { name: "Advanced Data Structures and Algorithms", credits: 4, grade: "C" },
-      { name: "Operating Systems", credits: 4, grade: "D" },
-      { name: "Professional Communication", credits: 2, grade: "D" }
-    ],
-    sgpa: 6.91
-  },
-  {
-    sem: 4,
-    courses: [
-      { name: "Computer and Communication Networks", credits: 4, grade: "D" },
-      { name: "Fundamentals of Full Stack Development", credits: 4, grade: "D" },
-      { name: "Artificial Intelligence", credits: 4, grade: "B" },
-      { name: "Theory of Computation", credits: 4, grade: "D" },
-      { name: "Advanced Communication Skills", credits: 2, grade: "D" },
-      { name: "Skills for Employability", credits: 2, grade: "C" }
-    ],
-    sgpa: 6.50
-  },
-  {
-    sem: 5,
-    courses: [
-      { name: "Framework Driven Front-End Development", credits: 4, grade: "A" },
-      { name: "Introduction to Cyber Security", credits: 3, grade: "B" },
-      { name: "Internet of Things and Applications", credits: 3, grade: "C" },
-      { name: "Information Retrieval", credits: 3, grade: "B" },
-      { name: "Advanced Engineering Mathematics", credits: 3, grade: "B" },
-      { name: "Personal Growth Programme", credits: 2, grade: "D" },
-      { name: "Quantitative and Reasoning Aptitude", credits: 2, grade: "B" }
-    ],
-    sgpa: 7.85
-  },
-  {
-    sem: 6,
-    courses: [
-      { name: "Web services and Backend Development", credits: 4, grade: "O" },
-      { name: "Financial Data Analysis", credits: 3, grade: "C" },
-      { name: "Internet Security", credits: 3, grade: "B" },
-      { name: "Intelligent Autonomous Systems", credits: 3, grade: "B" },
-      { name: "Additional Project", credits: 3, grade: "A" },
-      { name: "Self-Expression Through Performing Arts", credits: 2, grade: "B" },
-      { name: "BTP-1 CSE Project", credits: 4, grade: "C" }
-    ],
-    sgpa: 8.18
-  }
-];
-
-// Editable semesters
-const editableSems = [
-  {
-    sem: 7,
-    status: "future",
-    courses: [
-      { name: "Course 1", credits: 4 },
-      { name: "Course 2", credits: 4 },
-      { name: "Course 3", credits: 3 },
-      { name: "Course 4", credits: 3 },
-      { name: "Mode Subject", credits: 3 }
-    ]
-  },
-  {
-    sem: 8,
-    status: "future",
-    courses: [
-      { name: "Course 1", credits: 4 },
-      { name: "Course 2", credits: 4 },
-      { name: "Course 3", credits: 2 }
-    ]
-  }
-];
-
-const STORAGE_KEY = 'cgpaTrackerEditableSems';
-
-function loadSavedData() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
-    const parsed = JSON.parse(saved);
-    if (!Array.isArray(parsed)) return;
-    parsed.forEach(savedSem => {
-      const sem = editableSems.find(item => item.sem === savedSem.sem);
-      if (sem && Array.isArray(savedSem.courses)) {
-        sem.courses = savedSem.courses.map(course => ({
-          name: course.name || '',
-          credits: Number(course.credits) || 0,
-          grade: course.grade || undefined
-        }));
-      }
-    });
-  } catch (err) {
-    console.warn('Could not load saved semester data', err);
-  }
-}
-
-function saveData() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(editableSems));
-  } catch (err) {
-    console.warn('Could not save semester data', err);
-  }
-}
-
-// Grade color class resolver
-function gradeClass(g) {
-  if (!g || g === 'NA') return 'g-NA';
-  return 'g-' + g;
-}
-
-// Calculate SGPA from courses
-function calcSGPA(courses) {
-  let totalCP = 0, totalC = 0;
-  for (const c of courses) {
-    const g = c.grade;
-    if (g && GP[g] !== undefined) {
-      totalCP += GP[g] * c.credits;
-      totalC += c.credits;
+      /* Grade Colors (Light Theme) */
+      --g-O: #059669;
+      --g-O-bg: rgba(16, 185, 129, 0.15);
+      --g-A: #2563eb;
+      --g-A-bg: rgba(59, 130, 246, 0.15);
+      --g-B: #7c3aed;
+      --g-B-bg: rgba(139, 92, 246, 0.15);
+      --g-C: #d97706;
+      --g-C-bg: rgba(245, 158, 11, 0.15);
+      --g-D: #ea580c;
+      --g-D-bg: rgba(249, 115, 22, 0.15);
+      --g-P: #475569;
+      --g-P-bg: rgba(100, 116, 139, 0.15);
+      --g-F: #e11d48;
+      --g-F-bg: rgba(225, 29, 72, 0.15);
     }
-  }
-  if (totalC === 0) return null;
-  return Math.round((totalCP / totalC) * 100) / 100;
-}
 
-// Build completed sem card
-function buildCompletedCard(semData, idx) {
-  const { sem, courses, sgpa } = semData;
-  const totalCredits = courses.reduce((a, c) => a + c.credits, 0);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  let rows = courses.map(c => `
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Glassmorphism Background Blobs */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    body::before {
+      top: -10%;
+      left: -5%;
+      width: 50vw;
+      height: 50vh;
+      background: rgba(59, 130, 246, 0.25);
+      /* Soft Blue */
+    }
+
+    body::after {
+      bottom: -10%;
+      right: -5%;
+      width: 60vw;
+      height: 60vh;
+      background: rgba(139, 92, 246, 0.2);
+      /* Soft Purple */
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 20px 100px;
+    }
+
+    /* Glass Panel Utility Class */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+    }
+
+    /* Header Section */
+    .header {
+      margin-bottom: 40px;
+      text-align: center;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .institute-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-transform: uppercase;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .roll-no {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Global Stats Hero */
+    .hero-stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 60px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .stat-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-val {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .stat-val.primary {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(15, 23, 42, 0.1);
+    }
+
+    /* Semesters Grid */
+    .semesters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+      margin-bottom: 50px;
+    }
+
+    .sem-card {
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .sem-card:hover {
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .sem-header {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .sem-num {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .sem-badge {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    .badge-done {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    .badge-current {
+      background: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+    }
+
+    .badge-future {
+      background: rgba(100, 116, 139, 0.1);
+      color: #475569;
+    }
+
+    .badge-perm {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    /* Course Table Headers */
+    .col-header {
+      padding: 10px 20px;
+      display: grid;
+      grid-template-columns: 1fr 48px 80px;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+    }
+
+    .col-h {
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .col-h.center {
+      text-align: center;
+    }
+
+    /* Course Rows */
+    .course-row {
+      display: grid;
+      grid-template-columns: 1fr 48px 80px;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.03);
+      gap: 12px;
+      transition: background 0.2s;
+    }
+
+    .course-row.locked-row {
+      grid-template-columns: 1fr 52px 56px 60px;
+    }
+
+    .course-row:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .course-row:last-child {
+      border-bottom: none;
+    }
+
+    .course-name {
+      font-size: 12px;
+      color: var(--text-main);
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    .course-credits {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .grade-chip {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    /* Grade Colors */
+    .g-O {
+      background: var(--g-O-bg);
+      color: var(--g-O);
+    }
+
+    .g-A {
+      background: var(--g-A-bg);
+      color: var(--g-A);
+    }
+
+    .g-B {
+      background: var(--g-B-bg);
+      color: var(--g-B);
+    }
+
+    .g-C {
+      background: var(--g-C-bg);
+      color: var(--g-C);
+    }
+
+    .g-D {
+      background: var(--g-D-bg);
+      color: var(--g-D);
+    }
+
+    .g-P {
+      background: var(--g-P-bg);
+      color: var(--g-P);
+    }
+
+    .g-F {
+      background: var(--g-F-bg);
+      color: var(--g-F);
+    }
+
+    .g-NA {
+      background: rgba(15, 23, 42, 0.05);
+      color: var(--text-muted);
+    }
+
+    /* Editable Rows Configuration */
+    .col-header.editable-cols,
+    .course-row.editable-row {
+      grid-template-columns: 1fr 52px 56px 60px;
+    }
+
+    .editable-row input,
+    .editable-row select {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 11px;
+      padding: 6px 8px;
+      width: 100%;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .editable-row input:focus,
+    .editable-row select:focus {
+      background: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    select.grade-select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2364748b'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      padding-right: 20px;
+    }
+
+    /* Semester Footer Metrics */
+    .sem-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(15, 23, 42, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .footer-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .footer-stat-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .footer-stat-lbl {
+      font-size: 9px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Info Note */
+    .edit-note {
+      font-size: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      padding: 12px 20px;
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    /* Animations & Scrollbar */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(15, 23, 42, 0.15);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(15, 23, 42, 0.25);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="header">
+      <div class="institute-tag">IIIT Sri City · CSE · B.Tech</div>
+      <h1>Academic Tracker</h1>
+      <div class="roll-no">ELLENDULA AKSHAY &nbsp;·&nbsp; S20230010079</div>
+    </div>
+
+    <div class="hero-stats-container">
+      <div class="glass stat-card">
+        <div class="stat-val primary" id="cgpaHeroVal">—</div>
+        <div class="stat-label">Cumulative CGPA</div>
+      </div>
+      <div class="glass stat-card">
+        <div class="stat-val" id="heroCredits">—</div>
+        <div class="stat-label">Total Credits Earned</div>
+      </div>
+      <div class="glass stat-card">
+        <div class="stat-val" id="heroPct">—%</div>
+        <div class="stat-label">Equivalent Percentage</div>
+      </div>
+    </div>
+
+    <div class="section-title">Completed Record</div>
+    <div class="semesters-grid" id="completedGrid"></div>
+    <div class="semesters-grid" id="editableGrid"></div>
+
+  </div>
+
+  <script>
+    // Grade points mapping
+    const GP = { O: 10, A: 9, B: 8, C: 7, D: 6, P: 5, F: 0 };
+
+    // Completed semesters data
+    const completedSems = [
+      {
+        sem: 1,
+        courses: [
+          { name: "Discrete Structures and Matrix Algebra", credits: 4, grade: "C" },
+          { name: "Computer Programming", credits: 4, grade: "C" },
+          { name: "Digital Logic Design", credits: 4, grade: "B" },
+          { name: "Overview of Computers Workshop", credits: 4, grade: "C" },
+          { name: "Essential English", credits: 2, grade: "D" },
+          { name: "Foundations in Human Values and Ethics", credits: 2, grade: "O" }
+        ],
+        sgpa: 7.40
+      },
+      {
+        sem: 2,
+        courses: [
+          { name: "Problem Solving (PS)", credits: 4, grade: "A" },
+          { name: "Data Structures and Algorithms (DSA)", credits: 4, grade: "C" },
+          { name: "Soft Skills (SS)", credits: 4, grade: "B" },
+          { name: "Computer Architecture (CA)", credits: 4, grade: "B" },
+          { name: "OPC", credits: 2, grade: "D" },
+          { name: "CCI", credits: 2, grade: "B" }
+        ],
+        sgpa: 7.80
+      },
+      {
+        sem: 3,
+        courses: [
+          { name: "Object Oriented Programming", credits: 4, grade: "C" },
+          { name: "Real Analysis, Numerical Analysis & Calculus", credits: 4, grade: "B" },
+          { name: "Database Management System", credits: 4, grade: "C" },
+          { name: "Advanced Data Structures and Algorithms", credits: 4, grade: "C" },
+          { name: "Operating Systems", credits: 4, grade: "D" },
+          { name: "Professional Communication", credits: 2, grade: "D" }
+        ],
+        sgpa: 6.91
+      },
+      {
+        sem: 4,
+        courses: [
+          { name: "Computer and Communication Networks", credits: 4, grade: "D" },
+          { name: "Fundamentals of Full Stack Development", credits: 4, grade: "D" },
+          { name: "Artificial Intelligence", credits: 4, grade: "B" },
+          { name: "Theory of Computation", credits: 4, grade: "D" },
+          { name: "Advanced Communication Skills", credits: 2, grade: "D" },
+          { name: "Skills for Employability", credits: 2, grade: "C" }
+        ],
+        sgpa: 6.50
+      },
+      {
+        sem: 5,
+        courses: [
+          { name: "Framework Driven Front-End Development", credits: 4, grade: "A" },
+          { name: "Introduction to Cyber Security", credits: 3, grade: "B" },
+          { name: "Internet of Things and Applications", credits: 3, grade: "C" },
+          { name: "Information Retrieval", credits: 3, grade: "B" },
+          { name: "Advanced Engineering Mathematics", credits: 3, grade: "B" },
+          { name: "Personal Growth Programme", credits: 2, grade: "D" },
+          { name: "Quantitative and Reasoning Aptitude", credits: 2, grade: "B" }
+        ],
+        sgpa: 7.85
+      },
+      {
+        sem: 6,
+        courses: [
+          { name: "Web services and Backend Development", credits: 4, grade: "O" },
+          { name: "Financial Data Analysis", credits: 3, grade: "C" },
+          { name: "Internet Security", credits: 3, grade: "B" },
+          { name: "Intelligent Autonomous Systems", credits: 3, grade: "B" },
+          { name: "Additional Project", credits: 3, grade: "A" },
+          { name: "Self-Expression Through Performing Arts", credits: 2, grade: "B" },
+          { name: "BTP-1 CSE Project", credits: 4, grade: "C" }
+        ],
+        sgpa: 8.18
+      }
+    ];
+
+    // Editable semesters
+    const editableSems = [
+      {
+        sem: 7,
+        status: "future",
+        courses: [
+          { name: "Course 1", credits: 4 },
+          { name: "Course 2", credits: 3 },
+          { name: "Course 3", credits: 3 },
+          { name: "Course 4", credits: 2 },
+        ]
+      },
+      {
+        sem: 8,
+        status: "future",
+        courses: [
+          { name: "Course 1", credits: 3 },
+          { name: "Course 2", credits: 3 },
+          { name: "Course 3", credits: 2 }
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = 'cgpaTrackerEditableSems';
+
+    function loadSavedData() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed)) return;
+        parsed.forEach(savedSem => {
+          const sem = editableSems.find(item => item.sem === savedSem.sem);
+          if (sem && Array.isArray(savedSem.courses)) {
+            sem.courses = savedSem.courses.map(course => ({
+              name: course.name || '',
+              credits: Number(course.credits) || 0,
+              grade: course.grade || undefined
+            }));
+          }
+        });
+      } catch (err) {
+        console.warn('Could not load saved semester data', err);
+      }
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(editableSems));
+      } catch (err) {
+        console.warn('Could not save semester data', err);
+      }
+    }
+
+    // Grade color class resolver
+    function gradeClass(g) {
+      if (!g || g === 'NA') return 'g-NA';
+      return 'g-' + g;
+    }
+
+    // Calculate SGPA from courses
+    function calcSGPA(courses) {
+      let totalCP = 0, totalC = 0;
+      for (const c of courses) {
+        const g = c.grade;
+        if (g && GP[g] !== undefined) {
+          totalCP += GP[g] * c.credits;
+          totalC += c.credits;
+        }
+      }
+      if (totalC === 0) return null;
+      return Math.round((totalCP / totalC) * 100) / 100;
+    }
+
+    // Build completed sem card
+    function buildCompletedCard(semData, idx) {
+      const { sem, courses, sgpa } = semData;
+      const totalCredits = courses.reduce((a, c) => a + c.credits, 0);
+
+      let rows = courses.map(c => `
     <div class="course-row">
       <div class="course-name">${c.name}</div>
       <div class="course-credits">${c.credits}cr</div>
@@ -562,7 +675,7 @@ function buildCompletedCard(semData, idx) {
     </div>
   `).join('');
 
-  return `
+      return `
     <div class="glass sem-card" style="animation-delay:${idx * 0.05}s">
       <div class="sem-header">
         <div class="sem-num">Semester ${sem}</div>
@@ -586,17 +699,17 @@ function buildCompletedCard(semData, idx) {
       </div>
     </div>
   `;
-}
+    }
 
-// Build editable sem card
-function buildEditableCard(semData, idx) {
-  const { sem, status, courses, locked } = semData;
-  const badge = locked ? 'badge-perm' : (status === 'current' ? 'badge-current' : 'badge-future');
-  const badgeText = locked ? 'Permanent' : (status === 'current' ? 'Current' : 'Upcoming');
+    // Build editable sem card
+    function buildEditableCard(semData, idx) {
+      const { sem, status, courses, locked } = semData;
+      const badge = locked ? 'badge-perm' : (status === 'current' ? 'badge-current' : 'badge-future');
+      const badgeText = locked ? 'Permanent' : (status === 'current' ? 'Current' : 'Upcoming');
 
-  let rows = courses.map((c, ci) => {
-    if (locked) {
-      return `
+      let rows = courses.map((c, ci) => {
+        if (locked) {
+          return `
         <div class="course-row editable-row locked-row">
           <div class="course-name">${c.name}</div>
           <div class="course-credits">${c.credits}cr</div>
@@ -604,9 +717,9 @@ function buildEditableCard(semData, idx) {
           <div class="grade-chip ${gradeClass(c.grade)}">${c.grade ? GP[c.grade] : '—'}</div>
         </div>
       `;
-    }
+        }
 
-    return `
+        return `
       <div class="course-row editable-row">
         <input type="text" placeholder="${c.name}" value="${c.name}"
                onchange="updateCourseName(${sem},${ci},this.value)" />
@@ -615,14 +728,14 @@ function buildEditableCard(semData, idx) {
                title="Credits" />
         <select class="grade-select" onchange="updateGrade(${sem},${ci},this.value)">
           <option value="">Gr</option>
-          ${['O','A','B','C','D','P','F'].map(g=>`<option value="${g}" ${c.grade===g?'selected':''}>${g}</option>`).join('')}
+          ${['O', 'A', 'B', 'C', 'D', 'P', 'F'].map(g => `<option value="${g}" ${c.grade === g ? 'selected' : ''}>${g}</option>`).join('')}
         </select>
         <div class="grade-chip ${gradeClass(c.grade)}" id="gchip_${sem}_${ci}">${c.grade ? GP[c.grade] : '—'}</div>
       </div>
     `;
-  }).join('');
+      }).join('');
 
-  return `
+      return `
     <div class="glass sem-card" style="animation-delay:${idx * 0.05}s" id="editCard_${sem}">
       <div class="sem-header">
         <div class="sem-num">Semester ${sem}</div>
@@ -638,7 +751,7 @@ function buildEditableCard(semData, idx) {
       <div class="sem-footer">
         <div class="footer-stat">
           <div class="footer-stat-val" id="editCredits_${sem}">
-            ${courses.reduce((a,c)=>a+c.credits,0)}
+            ${courses.reduce((a, c) => a + c.credits, 0)}
           </div>
           <div class="footer-stat-lbl">Credits</div>
         </div>
@@ -653,122 +766,123 @@ function buildEditableCard(semData, idx) {
       </div>
     </div>
   `;
-}
-
-function updateCourseName(sem, idx, val) {
-  const s = editableSems.find(item => item.sem===sem);
-  if (s) {
-    s.courses[idx].name = val;
-    saveData();
-  }
-}
-
-function updateCourseCredits(sem, idx, val) {
-  const s = editableSems.find(item => item.sem===sem);
-  if (s) {
-    s.courses[idx].credits = val;
-    recalcEditable(sem);
-    updateAll();
-    saveData();
-  }
-}
-
-function updateGrade(sem, courseIdx, grade) {
-  const s = editableSems.find(x=>x.sem===sem);
-  if (s) {
-    s.courses[courseIdx].grade = grade || undefined;
-    const chip = document.getElementById(`gchip_${sem}_${courseIdx}`);
-    if (chip) {
-      chip.className = 'grade-chip ' + gradeClass(grade || 'NA');
-      chip.textContent = grade ? `${GP[grade]}` : '—';
     }
-    recalcEditable(sem);
-    updateAll();
-    saveData();
-  }
-}
 
-function recalcEditable(sem) {
-  const s = editableSems.find(x=>x.sem===sem);
-  const sgpa = calcSGPA(s.courses);
-  const sgpaEl = document.getElementById(`editSGPA_${sem}`);
-  const credEl = document.getElementById(`editCredits_${sem}`);
-
-  if (sgpaEl) {
-    sgpaEl.textContent = sgpa !== null ? sgpa.toFixed(2) : '—';
-  }
-  if (credEl) {
-    credEl.textContent = s.courses.reduce((a,c)=>a+c.credits,0);
-  }
-}
-
-function updateAll() {
-  // Compute Projected CGPA for editable cards
-  let runCumCP = 0, runCumC = 0;
-  for (const s of completedSems) {
-    for (const c of s.courses) {
-      if (c.grade && GP[c.grade] !== undefined) {
-        runCumCP += GP[c.grade] * c.credits;
-        runCumC += c.credits;
+    function updateCourseName(sem, idx, val) {
+      const s = editableSems.find(item => item.sem === sem);
+      if (s) {
+        s.courses[idx].name = val;
+        saveData();
       }
     }
-  }
-  for (const s of editableSems) {
-    for (const c of s.courses) {
-      if (c.grade && GP[c.grade] !== undefined) {
-        runCumCP += GP[c.grade] * c.credits;
-        runCumC += c.credits;
+
+    function updateCourseCredits(sem, idx, val) {
+      const s = editableSems.find(item => item.sem === sem);
+      if (s) {
+        s.courses[idx].credits = val;
+        recalcEditable(sem);
+        updateAll();
+        saveData();
       }
     }
-    const projected = runCumC > 0 ? Math.round((runCumCP / runCumC) * 100) / 100 : null;
-    const el = document.getElementById(`editCGPA_${s.sem}`);
-    if (el) {
-      el.textContent = projected !== null ? projected.toFixed(2) : '—';
-    }
-  }
 
-  const allSems = [...completedSems, ...editableSems];
-  let totalCredits = 0;
-  let cumulativePoints = 0;
-  let gradedCredits = 0;
-
-  allSems.forEach(sem => {
-    sem.courses.forEach(course => {
-      totalCredits += course.credits;
-      if (course.grade && GP[course.grade] !== undefined) {
-        gradedCredits += course.credits;
-        cumulativePoints += GP[course.grade] * course.credits;
+    function updateGrade(sem, courseIdx, grade) {
+      const s = editableSems.find(x => x.sem === sem);
+      if (s) {
+        s.courses[courseIdx].grade = grade || undefined;
+        const chip = document.getElementById(`gchip_${sem}_${courseIdx}`);
+        if (chip) {
+          chip.className = 'grade-chip ' + gradeClass(grade || 'NA');
+          chip.textContent = grade ? `${GP[grade]}` : '—';
+        }
+        recalcEditable(sem);
+        updateAll();
+        saveData();
       }
-    });
-  });
+    }
 
-  // Apply a 4-point penalty offset to match the official transcript CGPA
-  if (cumulativePoints >= 4) {
-    cumulativePoints -= 4;
-  }
+    function recalcEditable(sem) {
+      const s = editableSems.find(x => x.sem === sem);
+      const sgpa = calcSGPA(s.courses);
+      const sgpaEl = document.getElementById(`editSGPA_${sem}`);
+      const credEl = document.getElementById(`editCredits_${sem}`);
 
-  const cumulativeCgpa = gradedCredits > 0 ? Math.round((cumulativePoints / gradedCredits) * 100) / 100 : null;
+      if (sgpaEl) {
+        sgpaEl.textContent = sgpa !== null ? sgpa.toFixed(2) : '—';
+      }
+      if (credEl) {
+        credEl.textContent = s.courses.reduce((a, c) => a + c.credits, 0);
+      }
+    }
 
-  document.getElementById('cgpaHeroVal').textContent = cumulativeCgpa !== null ? cumulativeCgpa.toFixed(2) : '—';
-  document.getElementById('heroCredits').textContent = totalCredits;
-  document.getElementById('heroPct').textContent = cumulativeCgpa !== null ? `${(cumulativeCgpa * 10).toFixed(1)}%` : '—';
-}
+    function updateAll() {
+      // Compute Projected CGPA for editable cards
+      let runCumCP = 0, runCumC = 0;
+      for (const s of completedSems) {
+        for (const c of s.courses) {
+          if (c.grade && GP[c.grade] !== undefined) {
+            runCumCP += GP[c.grade] * c.credits;
+            runCumC += c.credits;
+          }
+        }
+      }
+      for (const s of editableSems) {
+        for (const c of s.courses) {
+          if (c.grade && GP[c.grade] !== undefined) {
+            runCumCP += GP[c.grade] * c.credits;
+            runCumC += c.credits;
+          }
+        }
+        const projected = runCumC > 0 ? Math.round((runCumCP / runCumC) * 100) / 100 : null;
+        const el = document.getElementById(`editCGPA_${s.sem}`);
+        if (el) {
+          el.textContent = projected !== null ? projected.toFixed(2) : '—';
+        }
+      }
+
+      const allSems = [...completedSems, ...editableSems];
+      let totalCredits = 0;
+      let cumulativePoints = 0;
+      let gradedCredits = 0;
+
+      allSems.forEach(sem => {
+        sem.courses.forEach(course => {
+          totalCredits += course.credits;
+          if (course.grade && GP[course.grade] !== undefined) {
+            gradedCredits += course.credits;
+            cumulativePoints += GP[course.grade] * course.credits;
+          }
+        });
+      });
+
+      // Apply a 4-point penalty offset to match the official transcript CGPA
+      if (cumulativePoints >= 4) {
+        cumulativePoints -= 4;
+      }
+
+      const cumulativeCgpa = gradedCredits > 0 ? Math.round((cumulativePoints / gradedCredits) * 100) / 100 : null;
+
+      document.getElementById('cgpaHeroVal').textContent = cumulativeCgpa !== null ? cumulativeCgpa.toFixed(2) : '—';
+      document.getElementById('heroCredits').textContent = totalCredits;
+      document.getElementById('heroPct').textContent = cumulativeCgpa !== null ? `${(cumulativeCgpa * 10).toFixed(1)}%` : '—';
+    }
 
 
-// Init function
-function init() {
-  loadSavedData();
+    // Init function
+    function init() {
+      loadSavedData();
 
-  document.getElementById('completedGrid').innerHTML =
-    completedSems.map((s, i) => buildCompletedCard(s, i)).join('');
+      document.getElementById('completedGrid').innerHTML =
+        completedSems.map((s, i) => buildCompletedCard(s, i)).join('');
 
-  document.getElementById('editableGrid').innerHTML =
-    editableSems.map((s, i) => buildEditableCard(s, i)).join('');
+      document.getElementById('editableGrid').innerHTML =
+        editableSems.map((s, i) => buildEditableCard(s, i)).join('');
 
-  updateAll();
-}
+      updateAll();
+    }
 
-window.addEventListener('load', init);
-</script>
+    window.addEventListener('load', init);
+  </script>
 </body>
+
 </html>
