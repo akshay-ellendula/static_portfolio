@@ -611,36 +611,7 @@
       }
     ];
 
-    const STORAGE_KEY = 'cgpaTrackerEditableSems';
 
-    function loadSavedData() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return;
-        const parsed = JSON.parse(saved);
-        if (!Array.isArray(parsed)) return;
-        parsed.forEach(savedSem => {
-          const sem = editableSems.find(item => item.sem === savedSem.sem);
-          if (sem && Array.isArray(savedSem.courses)) {
-            sem.courses = savedSem.courses.map(course => ({
-              name: course.name || '',
-              credits: Number(course.credits) || 0,
-              grade: course.grade || undefined
-            }));
-          }
-        });
-      } catch (err) {
-        console.warn('Could not load saved semester data', err);
-      }
-    }
-
-    function saveData() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(editableSems));
-      } catch (err) {
-        console.warn('Could not save semester data', err);
-      }
-    }
 
     // Grade color class resolver
     function gradeClass(g) {
@@ -772,7 +743,6 @@
       const s = editableSems.find(item => item.sem === sem);
       if (s) {
         s.courses[idx].name = val;
-        saveData();
       }
     }
 
@@ -782,7 +752,6 @@
         s.courses[idx].credits = val;
         recalcEditable(sem);
         updateAll();
-        saveData();
       }
     }
 
@@ -797,7 +766,6 @@
         }
         recalcEditable(sem);
         updateAll();
-        saveData();
       }
     }
 
@@ -833,7 +801,14 @@
             runCumC += c.credits;
           }
         }
-        const projected = runCumC > 0 ? Math.round((runCumCP / runCumC) * 100) / 100 : null;
+        
+        // Apply the 4-point penalty offset for projected CGPA too
+        let adjustedCP = runCumCP;
+        if (adjustedCP >= 4) {
+          adjustedCP -= 4;
+        }
+
+        const projected = runCumC > 0 ? Math.round((adjustedCP / runCumC) * 100) / 100 : null;
         const el = document.getElementById(`editCGPA_${s.sem}`);
         if (el) {
           el.textContent = projected !== null ? projected.toFixed(2) : '—';
@@ -870,8 +845,6 @@
 
     // Init function
     function init() {
-      loadSavedData();
-
       document.getElementById('completedGrid').innerHTML =
         completedSems.map((s, i) => buildCompletedCard(s, i)).join('');
 
