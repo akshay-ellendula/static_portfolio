@@ -462,15 +462,15 @@ const completedSems = [
   {
     sem: 6,
     courses: [
-      { name: "BTP", credits: 4, grade: "C" },
-      { name: "WBD", credits: 4, grade: "O" },
-      { name: "Additional Project", credits: 3, grade: "B" },
-      { name: "IS", credits: 3, grade: "B" },
-      { name: "IAS", credits: 3, grade: "B" },
-      { name: "FDA", credits: 3, grade: "C" },
-      { name: "SEPTA", credits: 2, grade: "B" }
+      { name: "Web services and Backend Development", credits: 4, grade: "O" },
+      { name: "Financial Data Analysis", credits: 3, grade: "C" },
+      { name: "Internet Security", credits: 3, grade: "B" },
+      { name: "Intelligent Autonomous Systems", credits: 3, grade: "B" },
+      { name: "Additional Project", credits: 3, grade: "A" },
+      { name: "Self-Expression Through Performing Arts", credits: 2, grade: "B" },
+      { name: "BTP-1 CSE Project", credits: 4, grade: "C" }
     ],
-    sgpa: 8.05
+    sgpa: 8.18
   }
 ];
 
@@ -741,6 +741,11 @@ function updateAll() {
       }
     });
   });
+
+  // Apply a 4-point penalty offset to match the official transcript CGPA
+  if (cumulativePoints >= 4) {
+    cumulativePoints -= 4;
+  }
 
   const cumulativeCgpa = gradedCredits > 0 ? Math.round((cumulativePoints / gradedCredits) * 100) / 100 : null;
 
